@@ -1,0 +1,9 @@
+{
+  "name": "PixiTest",
+  "version": "0.0.1",
+  "author": "Vashev Sergey",
+  "description": "a simple web pixi test page",
+  "dependencies": {
+    "pixi.js": "~4.0.0"
+  }
+}
