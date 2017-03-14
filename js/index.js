@@ -3,12 +3,14 @@
 var pixiObj = {
 
   APPLICTAION: {},
+  appHeight: 600,
+  appWidth: 800,
 
   /**
   * Create applictaion
   */
   _createApp: function() {
-    this.APPLICTAION = new PIXI.Application(800, 600, {backgroundColor : 0x1099bb});
+    this.APPLICTAION = new PIXI.Application(this.appWidth, this.appHeight, {backgroundColor : 0x1099bb});
   },
 
   /**
@@ -75,24 +77,40 @@ var pixiObj = {
   */
   createReel: function() {
     var _app = this.APPLICTAION,
-        slot,
-        reel = new PIXI.Container(),
+        slotFace,
+        slotBack,
+        faceReel = new PIXI.Container(),
+        backReel = new PIXI.Container(),
         i;
 
-    _app.stage.addChild(reel);
+    _app.stage.addChild(faceReel);
+    _app.stage.addChild(backReel);
     // Create a 1x5 grid of slots
-    for (i = 0; i < 25; i++) {
-      slot = this.createSprite('../resources/1.png')
-      slot.anchor.set(0);
-      slot.y = Math.floor(i / 5) * 200;
-      reel.addChild(slot);
+    for (i = 0; i < 5; i++) {
+      slotFace = this.createSprite('../resources/1.png');
+      slotBack = this.createSprite('../resources/2.png');
+      slotFace.anchor.set(0);
+      slotBack.anchor.set(0);
+
+      slotFace.y = i * 220;
+      slotBack.y = i * 220;
+
+      faceReel.addChild(slotFace);
+      backReel.addChild(slotBack);
     }
     //temporary solution
-    reel.scale.x = reel.scale.y = 0.4;
+    faceReel.scale.x = faceReel.scale.y = 0.55;
+    backReel.scale.x = backReel.scale.y = 0.55;
     //for now it's centered
-    reel.x = (_app.renderer.width - reel.width) / 2;
-    reel.y = (_app.renderer.height - reel.height) / 2;
-    requestAnimationFrame(this.moveReel.bind(this, reel));
+    faceReel.x = backReel.x = (_app.renderer.width - faceReel.width) / 2;
+    faceReel.y = 0;
+
+    //TODO: The last element doesnot count in container height
+    //That's why we need 200 * 0.4
+    //Yeah this is bug
+    backReel.y = faceReel.y + faceReel.height + 220 * 0.55;
+    requestAnimationFrame(this.moveReel.bind(this, faceReel));
+    requestAnimationFrame(this.moveReel.bind(this, backReel));
   },
 
   /**
@@ -103,9 +121,30 @@ var pixiObj = {
     var seed = Math.floor(Math.random() * 6000) + 1000,
         interval;
     interval = setInterval(function() {
+      isOverFlow = reel.y - reel.height;
       reel.y += 1;
-      if (reel.y > 600) { reel.y = 0};
-    }, 10);
+      if (this.isObjectOverflow(reel)) {
+      }
+      if (reel.y > 600) {
+        reel.y = -reel.height;
+      }
+    }.bind(this), 10);
+    setTimeout(clearTimeout.bind(null, interval), seed);
+  },
+
+  /**
+  * Can we see a whole object/sprite/texture on Y axis
+  * @param {Object} viewObject - object which are we checking
+  * @return {Boolean} is object overflow
+  */
+  isObjectOverflow: function(viewObject) {
+    var _appHeight = this.appHeight,
+        _appWidth = this.appWidth,
+        result = false;
+    if (_appHeight - viewObject.y < viewObject.height || viewObject.y < 0) {
+      result = true;
+    }
+    return result;
 
   },
 
